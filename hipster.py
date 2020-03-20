@@ -1,12 +1,13 @@
 #####################################################################################
 # HIPSTER - Homogeneous to Inhomogeneous rock Properties for Stress TEnsor Research	#
-# Version 1.0																		#
+# Version 1.01																		#
 # License: GPLv3																	#
 # Moritz O. Ziegler - mziegler@gfz-potsdam.de										#
 # Manual: http://github.com/MorZieg/HIPSTER											#
 # Download: http://github.com/MorZieg/HIPSTER										#
 #####################################################################################
 import numpy as np
+
 
 class rock:
 	def __init__(self, unit, E, E_sig, nu, nu_sig, rho, rho_sig):
@@ -31,7 +32,7 @@ Middle = rock('Middle',35E9,2.5E9,0.21,0.02,2625,250)
 Bottom = rock('Bottom',45E9,0,0.24,0,2850,0)
 
 #####################################################################################
-def main(input_geometry,strata,exclude_elems):
+def main(input_geometry,strata,distrib,output_name):
 	## Reading geometry
 	# Loads the units regardless whether they are defined in sets (APPLE PY) or in ELSETS (original solver deck)
 	# and read the element numbers
@@ -93,9 +94,9 @@ def main(input_geometry,strata,exclude_elems):
 	mat_fin.write('** Inhomogeneous material properties\n** Created by HIPSTER v1.0 - http://github.com/MorZieg/hipster\n** %s\n**\n** Material definitions\n' % str(np.datetime64('now')))
 	
 	# Draw values from distribution and write material definition
-	for x,n in enumerate(set):
-		mat_fin.write('**\n** %s\n**\n' % n)
-		mat_ini.write('**\n** %s\n**\n' % n)
+	for x,n in enumerate(strata):
+		mat_fin.write('**\n** %s\n**\n' % set[x])
+		mat_ini.write('**\n** %s\n**\n' % set[x])
 		
 		E = eval(n + '.E')
 		E_sig = eval(n + '.E_sig')
@@ -105,45 +106,45 @@ def main(input_geometry,strata,exclude_elems):
 		rho_sig = eval(n + '.rho_sig')
 
 		if E_sig == 0 and nu_sig == 0 and rho_sig == 0:
-			mat_ini.write('*MATERIAL, NAME=rock_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.6g, 0.49, 0.0\n*DENSITY\n%.0f\n**\n' % (n, E, rho))
-			mat_fin.write('*MATERIAL, NAME=rock_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.8g, %.3f, 0.0\n*DENSITY\n%.0f\n**\n' % (n, E, nu, rho))
+			mat_ini.write('*MATERIAL, NAME=rock_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.6g, 0.49, 0.0\n*DENSITY\n%.0f\n**\n' % (set[x], E, rho))
+			mat_fin.write('*MATERIAL, NAME=rock_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.8g, %.3f, 0.0\n*DENSITY\n%.0f\n**\n' % (set[x], E, nu, rho))
 		else:
 			for i,el in enumerate(elems[x]):
 				if distrib == 'normal':
 					E_elem,nu_elem,rho_elem = normal_distrib(E,E_sig,nu,nu_sig,rho,rho_sig)
 				elif distrib =='uniform':
 					E_elem,nu_elem,rho_elem = uniform_distrib(E,E_sig,nu,nu_sig,rho,rho_sig)
-				mat_ini.write('*MATERIAL, NAME=rock_%s_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.6g, 0.49, 0.0\n*DENSITY\n%.0f\n**\n' % (n, el, E_elem, rho_elem))
-				mat_fin.write('*MATERIAL, NAME=rock_%s_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.8g, %.3f, 0.0\n*DENSITY\n%.0f\n**\n' % (n, el, E_elem, nu_elem, rho_elem))
+				mat_ini.write('*MATERIAL, NAME=rock_%s_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.6g, 0.49, 0.0\n*DENSITY\n%.0f\n**\n' % (set[x], el, E_elem, rho_elem))
+				mat_fin.write('*MATERIAL, NAME=rock_%s_%s\n*ELASTIC, TYPE = ISOTROPIC\n%.8g, %.3f, 0.0\n*DENSITY\n%.0f\n**\n' % (set[x], el, E_elem, nu_elem, rho_elem))
 	
 	
 	# Create an element set per element
 	mat_fin.write('**\n**\n** Element sets\n')
 	mat_ini.write('**\n**\n** Element sets\n')
-	for x,n in enumerate(set):
+	for x,n in enumerate(strata):
 		if eval(n + '.E_sig') != 0 or eval(n + '.nu_sig') != 0 or eval(n + '.rho_sig') != 0:
-			mat_fin.write('**\n** %s\n**\n' % n)
-			mat_ini.write('**\n** %s\n**\n' % n)
+			mat_fin.write('**\n** %s\n**\n' % set[x])
+			mat_ini.write('**\n** %s\n**\n' % set[x])
 			for _,el in enumerate(elems[x]):
-				mat_ini.write('*ELSET, ELSET=%s_%s\n%s\n' % (n, el, el))
-				mat_fin.write('*ELSET, ELSET=%s_%s\n%s\n' % (n, el, el))
+				mat_ini.write('*ELSET, ELSET=%s_%s\n%s\n' % (set[x], el, el))
+				mat_fin.write('*ELSET, ELSET=%s_%s\n%s\n' % (set[x], el, el))
 	
 	
 	# Write solid section.
 	mat_fin.write('**\n**\n** Solidsections\n')
 	mat_ini.write('**\n**\n** Solidsections\n')
-	for x,n in enumerate(set):
+	for x,n in enumerate(strata):
 		if eval(n + '.E_sig') == 0 and eval(n + '.nu_sig') == 0 and eval(n + '.rho_sig') == 0:
-			mat_fin.write('**\n** %s\n' % n)
-			mat_ini.write('**\n** %s\n' % n)
-			mat_ini.write('*SOLIDSECTION,ELSET=%s, MATERIAL=rock_%s\n' % (n,n))
-			mat_fin.write('*SOLIDSECTION,ELSET=%s, MATERIAL=rock_%s\n' % (n,n))
+			mat_fin.write('**\n** %s\n' % set[x])
+			mat_ini.write('**\n** %s\n' % set[x])
+			mat_ini.write('*SOLIDSECTION,ELSET=%s, MATERIAL=rock_%s\n' % (set[x],set[x]))
+			mat_fin.write('*SOLIDSECTION,ELSET=%s, MATERIAL=rock_%s\n' % (set[x],set[x]))
 		else:
-			mat_fin.write('**\n** %s\n' % n)
-			mat_ini.write('**\n** %s\n' % n)
+			mat_fin.write('**\n** %s\n' % set[x])
+			mat_ini.write('**\n** %s\n' % set[x])
 			for i,el in enumerate(elems[x]):
-				mat_ini.write('*SOLIDSECTION,ELSET=%s_%s, MATERIAL=rock_%s_%s\n' % (n,el,n,el))
-				mat_fin.write('*SOLIDSECTION,ELSET=%s_%s, MATERIAL=rock_%s_%s\n' % (n,el,n,el))
+				mat_ini.write('*SOLIDSECTION,ELSET=%s_%s, MATERIAL=rock_%s_%s\n' % (set[x],el,set[x],el))
+				mat_fin.write('*SOLIDSECTION,ELSET=%s_%s, MATERIAL=rock_%s_%s\n' % (set[x],el,set[x],el))
 
 	
 	mat_fin.close()
@@ -242,5 +243,5 @@ def elsetread(fid):
 	
 #####################################################################################
 if __name__ == '__main__':
-	main(input_geometry,strata,distrib)
+	main(input_geometry,strata,distrib,output_name)
 #####################################################################################
