@@ -14,7 +14,6 @@ The recommended citation for HIPSTER is: (You can find the BibTeX snippet in the
 
 > Ziegler, M. O. (2021). Python Script HIPSTER v1.3. GFZ Data Services. DOI: http://doi.org/10.5880/wsm.2021.001
 
-
 [![DOI](https://img.shields.io/badge/DOI-10.5880%2Fwsm.2021.001-blue.svg)](http://doi.org/10.5880/wsm.2021.001)
 
 ## Previous version
