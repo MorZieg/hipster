@@ -1,7 +1,6 @@
 # HIPSTER
 ### _Homogeneous to Inhomogeneous rock Properties for Stress TEnsor Research_
 
-
 ## Documentation
 
 Documentation and usage examples are available online at:
