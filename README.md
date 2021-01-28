@@ -7,7 +7,7 @@
 Documentation and usage examples are available online at:
 
 Ziegler, M. O. (2020). Manual of the Python Script HIPSTER v1.3. World Stress Map Technical Report 21-01, GFZ German Research Centre for Geosciences.
-DOI: http://doi.org/10.2312/wsm.2021.001 [![DOI](https://img.shields.io/badge/DOI-10.2312%2Fwsm.2021.001-blue.svg)](http://doi.org/10.2312/wsm.2021.001)
+DOI: http://doi.org/10.48440/wsm.2021.001 [![DOI](https://img.shields.io/badge/DOI-10.48440%2Fwsm.2021.001-blue.svg)](http://doi.org/10.48440/wsm.2021.001)
 
 ## Citation
 The recommended citation for HIPSTER is: (You can find the BibTeX snippet in the
